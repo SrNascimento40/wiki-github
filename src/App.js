@@ -1,24 +1,44 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useState } from 'react';
+import Button from './components/Button';
+import Input from './components/input';
+import ItemRepo from './components/ItemRepo';
+import { Container } from './styles/styles';
+import { api } from "./services/api"
 
 function App() {
+  const [currentRepo, setCurrentRepo] = useState('')
+  const [repos, setRepos] = useState([])
+
+  const handleSearchRepo = async () => {
+    const { data } = await api.get(`repos/${currentRepo}`)
+    if (data.id) {
+
+      const isExist = repos.find(repo => repo.id === data.id)
+
+      if (!isExist) {
+        setRepos(prev => [...prev, data])
+        setCurrentRepo('')
+        console.log(repos);
+        return
+      }
+    }
+    else {
+      alert('Repositório não encontrado')
+    }
+  }
+
+  const handleRemoveRepo = (id) => {
+    setRepos(repos.filter(repo => repo.id !== id))
+    //usar filter
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Container>
+      <img src='https://cdn-icons-png.flaticon.com/512/25/25231.png' alt='Github logo' width={72} height={72} />
+      <Input value={currentRepo} onChange={(e) => setCurrentRepo(e.target.value)} />
+      <Button onClick={handleSearchRepo} />
+      {repos.map(repo => <ItemRepo handleRemoveRepo={handleRemoveRepo} repo={repo} />)}
+    </Container>
   );
 }
 
